@@ -14,9 +14,9 @@ import axiosInstance from "@/services/axios/axios";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
+import React from "react";
 import Setting from "./Setting";
 import SwtichLanguage from "./SwitchLanguage";
-import React from "react";
 
 export default function Header() {
   const session = useSession();
@@ -121,7 +121,7 @@ export default function Header() {
             <Setting />
             <UserMenu
               user={{
-                name: session?.data?.user?.name ?? "",
+                name: session?.data?.user?.username ?? "",
                 image: "https://avatars.dicebear.com/api/avatars/123.svg",
                 email: session?.data?.user?.email ?? "",
               }}

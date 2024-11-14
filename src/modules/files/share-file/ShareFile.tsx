@@ -21,14 +21,6 @@ export default function ShareFile({ id }: any) {
 
     const [item, SetItem] = useState<FileModel | null>(null);
 
-    // Query to get view count
-    const { data: views } = useQuery({
-        queryKey: ["file-views", id],
-        queryFn: async () => {
-            const { data } = await axiosInstance.get(`/api/v1/files/public/${id}/views`);
-            return data.views;
-        },
-    });
 
     // Mutation for incrementing view count
     const { mutate: incrementView } = useMutation({
