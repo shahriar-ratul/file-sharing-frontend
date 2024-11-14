@@ -1,0 +1,93 @@
+{
+    "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+    "formatter": {
+        "enabled": true,
+        "formatWithErrors": true,
+        "indentStyle": "space",
+        "indentWidth": 4,
+        "lineEnding": "lf",
+        "lineWidth": 120,
+        "attributePosition": "auto",
+        "ignore": [
+            "./node_modules/**",
+            "./package-lock.json",
+            "./package.json",
+            "./tmp",
+            "./coverage",
+            "./public/**",
+            "./dist/**",
+            "./test/**",
+            "./logs/**",
+            "./.next/**"
+        ]
+    },
+    "organizeImports": {
+        "enabled": true
+    },
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "recommended": true,
+            "style": {
+                "useImportType": "off"
+            }
+        },
+        "ignore": [
+            "eslint.config.js",
+            "coverage",
+            "test",
+            "node_modules",
+            "pnpm-lock.yaml",
+            "pnpm-workspace.yaml",
+            "*.config.js",
+            "*.json",
+            "commitlint.config.js",
+            "jest.preset.js",
+            "jest.config.js",
+            "dist/*",
+            "tsconfig.json",
+            "tsconfig.*.json",
+            ".next/**",
+            "public/**",
+            "dist/**",
+            "test/**",
+            "logs/**",
+            ".next/types/**"
+        ]
+    },
+    "javascript": {
+        "formatter": {
+            "jsxQuoteStyle": "single",
+            "quoteProperties": "asNeeded",
+            "trailingCommas": "es5",
+            "semicolons": "always",
+            "arrowParentheses": "always",
+            "bracketSpacing": true,
+            "bracketSameLine": false,
+            "quoteStyle": "single",
+            "attributePosition": "auto"
+        },
+        "parser": {
+            "unsafeParameterDecoratorsEnabled": true
+        },
+        "globals": []
+    },
+    "overrides": [
+        {
+            "include": ["*.ts", "*.tsx"],
+            "javascript": {
+                "globals": []
+            },
+            "linter": {
+                "rules": {
+                    "suspicious": {
+                        "noExplicitAny": "off"
+                    }
+                }
+            }
+        }
+    ],
+    "files": {
+        "ignore": ["node_modules/**", "dist/**", "test/**"]
+    }
+}
