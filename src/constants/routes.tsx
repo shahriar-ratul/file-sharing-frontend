@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { type NavItem } from "@/types";
 import {
+  ArrowUpIcon,
   ChevronDown,
   Container,
   FormInput,
@@ -42,6 +43,11 @@ export const mainRoutes: NavItem[] = [
         title: "Files",
         path: "/files",
         icon: <Receipt size={16} />,
+      },
+      {
+        title: "New Upload",
+        path: "/files/upload",
+        icon: <ArrowUpIcon size={16} />,
       },
     ],
     isLabel: true,

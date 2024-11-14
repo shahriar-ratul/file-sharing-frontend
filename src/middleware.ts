@@ -2,7 +2,7 @@
 import { auth } from 'auth';
 import { type Session } from 'next-auth';
 import { type NextRequest } from 'next/server';
-import { DEFAULT_LOGIN_REDIRECT, apiAuthPrefix, authRoutes, publicRoutes } from './routes';
+import { DEFAULT_LOGIN_REDIRECT, apiAuthPrefix, authRoutes, matchesRoute, publicRoutes } from './routes';
 // export const middleware = auth;
 
 export default auth((req: NextRequest & { auth: Session | null }): any => {
@@ -14,7 +14,7 @@ export default auth((req: NextRequest & { auth: Session | null }): any => {
     const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
     const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
-    if (isPublicRoute) {
+    if (matchesRoute(nextUrl.pathname, publicRoutes)) {
         return null;
     }
 
@@ -42,6 +42,8 @@ export default auth((req: NextRequest & { auth: Session | null }): any => {
             return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
         }
     }
+
+    return null;
 });
 
 export const config = { matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/(api|trpc)(.*)'] };
