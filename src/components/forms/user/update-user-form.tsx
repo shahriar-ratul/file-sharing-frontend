@@ -9,10 +9,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { Input } from '@/components/ui/input';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -37,32 +37,21 @@ import { format } from "date-fns";
 
 import { toast } from "sonner";
 
+import Loader from "@/components/loader/Loader";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { cn } from "@/lib/utils";
-import { type AdminModel } from "@/schema/AdminSchema";
-import { type RoleModel } from "@/schema/RoleSchema";
+import { type UserModel } from "@/schema/UserSchema";
 import axiosInstance from "@/services/axios/axios";
 import {
   ArrowUpIcon,
   CalendarIcon,
-  Check,
   CheckCircle2Icon,
-  ChevronsUpDown,
   MessageCircleWarningIcon,
   X,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import Image from "next/image";
 import React from "react";
-import { MultiSelect } from "@/components/ui/multi-select";
-import Loader from "@/components/loader/Loader";
 
 const formSchema = z.object({
   firstName: z
@@ -76,18 +65,10 @@ const formSchema = z.object({
     .min(3, { message: "username must be at least 3 characters" }),
   email: z.string().email({ message: "Please enter a valid email" }),
   mobile: z.string().min(1, { message: "Please enter a valid phone number" }),
-  password: z
-    .string()
-    .min(6, { message: "Password must be at least 6 characters" }),
-  dob: z
-    .date({
-      required_error: "A date of birth is required.",
-    })
-    .optional(),
+  password: z.string().optional(),
+  dob: z.date({ required_error: "A date of birth is required." }).optional(),
   joinedDate: z
-    .date({
-      required_error: "A date of birth is required.",
-    })
+    .date({ required_error: "A joined date is required." })
     .optional(),
   isActive: z.boolean().default(false),
   roles: z
@@ -97,16 +78,15 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const CreateAdminForm = () => {
+interface PropData {
+  item: UserModel;
+}
+
+export const UpdateUserForm = ({ item }: PropData) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  const [roles, setRoles] = useState<RoleModel[]>([]);
 
-  const session = useSession();
-
-  // image
-  // image upload
 
   const [files, setFiles] = useState<(File & { preview: string })[]>([]);
   const [rejected, setRejected] = useState<FileRejection[]>([]);
@@ -114,12 +94,6 @@ export const CreateAdminForm = () => {
   const onDrop = useCallback(
     (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
       if (acceptedFiles?.length) {
-        // setFiles(previousFiles => [
-        //   ...previousFiles,
-        //   ...acceptedFiles.map(file =>
-        //     Object.assign(file, { preview: URL.createObjectURL(file) })
-        //   )
-        // ]);
         setFiles(
           acceptedFiles.map((file) =>
             Object.assign(file, { preview: URL.createObjectURL(file) })
@@ -145,7 +119,6 @@ export const CreateAdminForm = () => {
   });
 
   useEffect(() => {
-    // Revoke the data uris to avoid memory leaks
     return () => {
       for (const file of files) {
         URL.revokeObjectURL(file.preview);
@@ -167,39 +140,21 @@ export const CreateAdminForm = () => {
   };
 
   const defaultValues = {
-    firstName: "",
-    lastName: "",
-    username: "",
-    email: "",
-    mobile: "",
+    firstName: item.firstName || "",
+    lastName: item.lastName || "",
+    username: item.username || "",
+    email: item.email || "",
+    mobile: item.mobile || "",
     password: "",
-    dob: undefined,
-    joinedDate: undefined,
-    roles: undefined,
-    isActive: true,
+    dob: item.dob ? new Date(item.dob) : undefined,
+    joinedDate: item.joinedDate ? new Date(item.joinedDate) : undefined,
+    isActive: item.isActive || false,
   };
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
-
-  const getRoles = async () => {
-    const { data } = await axiosInstance.get("/api/v1/common/all-roles", {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (data.success) {
-      setRoles(data.data.items as RoleModel[]);
-    }
-  };
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-  useEffect(() => {
-    getRoles();
-  }, []);
 
   const onSubmit = async (data: FormValues) => {
     try {
@@ -224,10 +179,12 @@ export const CreateAdminForm = () => {
       formData.append("username", username);
       formData.append("email", email);
       formData.append("mobile", mobile);
-      formData.append("password", password);
       formData.append("roles", JSON.stringify(roles));
-
       formData.append("isActive", String(isActive));
+
+      if (password) {
+        formData.append("password", password);
+      }
 
       if (dob) {
         formData.append("dob", JSON.stringify(dob));
@@ -242,22 +199,20 @@ export const CreateAdminForm = () => {
       }
 
       await axiosInstance
-        .post("/api/v1/admins", formData, {
+        .put(`/api/v1/admins/${item.id}`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         })
         .then((res) => {
           const message =
-            (res.data.data.message as string) || "Admin created successfully";
+            (res.data.data.message as string) || "Admin updated successfully";
 
           toast(message, {
             icon: (
               <CheckCircle2Icon className="text-success dark:text-success-foreground" />
             ),
-            style: {
-              color: "green",
-            },
+            style: { color: "green" },
             closeButton: true,
             duration: 5000,
             position: "top-right",
@@ -275,9 +230,7 @@ export const CreateAdminForm = () => {
             ),
             closeButton: true,
             duration: 5000,
-            style: {
-              color: "red",
-            },
+            style: { color: "red" },
             position: "top-right",
           });
         });
@@ -296,7 +249,7 @@ export const CreateAdminForm = () => {
     <div className="relative w-full">
       {loading && (
         <div className="fixed inset-0 bg-background/50 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-background/80 p-10 rounded-lg shadow-lg">
+          <div className="bg-background/80 p-6 rounded-lg shadow-lg">
             <Loader />
           </div>
         </div>
@@ -311,7 +264,7 @@ export const CreateAdminForm = () => {
             <CardHeader>
               <CardTitle>Personal Information</CardTitle>
               <CardDescription>
-                Your simple personal information required for identification
+                Update your personal information
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -362,12 +315,7 @@ export const CreateAdminForm = () => {
                   name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
-                        Username &nbsp;
-                        <span className="text-destructive dark:text-destructive-foreground">
-                          ( Username must be unique)
-                        </span>
-                      </FormLabel>
+                      <FormLabel>Username</FormLabel>
                       <FormControl>
                         <Input
                           disabled={loading}
@@ -379,18 +327,14 @@ export const CreateAdminForm = () => {
                     </FormItem>
                   )}
                 />
+
                 {/* email */}
                 <FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
-                        Email &nbsp;
-                        <span className="text-destructive dark:text-destructive-foreground">
-                          (Email must be unique)
-                        </span>
-                      </FormLabel>
+                      <FormLabel>Email</FormLabel>
                       <FormControl>
                         <Input
                           disabled={loading}
@@ -403,18 +347,14 @@ export const CreateAdminForm = () => {
                     </FormItem>
                   )}
                 />
+
                 {/* mobile */}
                 <FormField
                   control={form.control}
                   name="mobile"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
-                        Mobile &nbsp;
-                        <span className="text-destructive dark:text-destructive-foreground">
-                          (Please add country code before number)
-                        </span>
-                      </FormLabel>
+                      <FormLabel>Mobile</FormLabel>
                       <FormControl>
                         <Input
                           type="text"
@@ -435,17 +375,16 @@ export const CreateAdminForm = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Password &nbsp;
+                        Password
                         <span className="text-destructive dark:text-destructive-foreground">
-                          (Password at least 6 characters long)
+                          (Leave empty to keep current password)
                         </span>
                       </FormLabel>
-
                       <FormControl>
                         <Input
                           type="password"
                           disabled={loading}
-                          placeholder="Password"
+                          placeholder="New Password"
                           {...field}
                         />
                       </FormControl>
@@ -466,7 +405,7 @@ export const CreateAdminForm = () => {
                             <Button
                               variant={"outline"}
                               className={cn(
-                                " pl-3 text-left font-normal w-full",
+                                "pl-3 text-left font-normal w-full",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
@@ -482,11 +421,8 @@ export const CreateAdminForm = () => {
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
-                            captionLayout="dropdown-buttons"
                             selected={field.value}
                             onSelect={field.onChange}
-                            fromYear={1960}
-                            toYear={2050}
                             // disabled={(date) =>
                             //   date > new Date() || date < new Date("1970-01-01")
                             // }
@@ -494,7 +430,6 @@ export const CreateAdminForm = () => {
                           />
                         </PopoverContent>
                       </Popover>
-
                       <FormMessage />
                     </FormItem>
                   )}
@@ -512,7 +447,7 @@ export const CreateAdminForm = () => {
                             <Button
                               variant={"outline"}
                               className={cn(
-                                " pl-3 text-left font-normal w-full",
+                                "pl-3 text-left font-normal w-full",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
@@ -528,30 +463,29 @@ export const CreateAdminForm = () => {
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
-                            captionLayout="dropdown-buttons"
                             selected={field.value}
                             onSelect={field.onChange}
-                            fromYear={1960}
-                            toYear={2050}
                             // disabled={(date) =>
                             //   date > new Date() || date < new Date("1970-01-01")
                             // }
+                            fromYear={1960}
+                            toYear={2050}
+                            captionLayout="dropdown-buttons"
                             initialFocus
                           />
                         </PopoverContent>
                       </Popover>
-
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name="roles"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Role</FormLabel>
+                      <FormLabel>Roles</FormLabel>
                       <MultiSelect
                         options={roles.map((role) => ({
                           label: role.name,
@@ -564,11 +498,10 @@ export const CreateAdminForm = () => {
                         animation={0}
                         maxCount={3}
                       />
-
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                /> */}
               </div>
             </CardContent>
 
@@ -638,6 +571,20 @@ export const CreateAdminForm = () => {
                       </p>
                     </li>
                   ))}
+                  {item.photo && files.length === 0 && (
+                    <li className="relative h-32 rounded-md shadow-lg dark:shadow-white">
+                      <Image
+                        src={item.photo}
+                        alt="Current profile photo"
+                        width={100}
+                        height={100}
+                        className="h-full w-full object-contain rounded-md dark:object-cover"
+                      />
+                      <p className="mt-2 text-neutral-500 text-[12px] font-medium dark:text-white">
+                        Current photo
+                      </p>
+                    </li>
+                  )}
                 </ul>
 
                 {/* Rejected Files */}
@@ -703,7 +650,7 @@ export const CreateAdminForm = () => {
                 className="bg-black dark:bg-white"
                 type="submit"
               >
-                Save
+                Update
               </Button>
             </CardFooter>
           </Card>

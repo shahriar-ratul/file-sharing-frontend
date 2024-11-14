@@ -1,9 +1,9 @@
 "use client";
-import AdminList from "@/modules/admin/AdminList";
-import Forbidden from "@/modules/errorPage/Forbidden";
+import UsersList from "@/modules/users/UserList";
+
 
 import React from "react";
 
 export default function AdminPage() {
-  return <> <AdminList /></>;
+  return <> <UsersList /></>;
 }

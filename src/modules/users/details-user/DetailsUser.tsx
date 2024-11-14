@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import BreadCrumb from '@/components/custom/BreadCrumb';
 import Loader from '@/components/loader/Loader';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
-import { type AdminModel } from '@/schema/AdminSchema';
+import { type UserModel } from '@/schema/UserSchema';
 import axiosInstance from '@/services/axios/axios';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -14,24 +14,24 @@ import React, { useState } from 'react';
 
 
 
-export default function DetailsAdmin({ id }: any) {
+export default function DetailsUser({ id }: any) {
   const breadcrumbItems = [
-    { title: "Admins", link: "/admins" },
-    { title: "Details", link: `/admins/${id}` },
+    { title: "Users", link: "/users" },
+    { title: "Details", link: `/users/${id}` },
   ];
 
-  const [item, SetItem] = useState<AdminModel | null>(null);
+  const [item, SetItem] = useState<UserModel | null>(null);
   const fetchData = async () => {
-    const { data } = await axiosInstance.get(`/api/v1/admins/${id}`);
+    const { data } = await axiosInstance.get(`/api/v1/users/${id}`);
     return data;
   };
 
   const { isLoading, isError, error, isFetching } = useQuery<boolean, any>({
-    queryKey: ["admins-list", id],
+    queryKey: ["users-list", id],
     queryFn: async () => {
       const { data } = await fetchData();
 
-      SetItem(data.data as AdminModel);
+      SetItem(data.data as UserModel);
 
       return true;
     },
@@ -55,7 +55,9 @@ export default function DetailsAdmin({ id }: any) {
             </div>
           ) : null}
           <Card>
-            <CardHeader>{/* <CardTitle>Admin List</CardTitle> */}</CardHeader>
+            <CardHeader>
+              <CardTitle>User Details</CardTitle>
+            </CardHeader>
             <CardContent>
               {item && (
                 <>

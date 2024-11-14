@@ -1,8 +1,7 @@
 'use client';
-import AddAdmin from '@/modules/admin/add-admin/AddAdmin';
-import Forbidden from '@/modules/errorPage/Forbidden';
+import AddUser from '@/modules/users/add-user/AddUser';
 import React from 'react';
 
-export default function CreateAdminPage() {
-  return <> <AddAdmin /> </>;
+export default function CreateUserPage() {
+  return <> <AddUser /> </>;
 }

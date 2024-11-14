@@ -1,9 +1,8 @@
 'use client';
-import UpdateAdmin from '@/modules/admin/update-admin/UpdateAdmin';
-import Forbidden from '@/modules/errorPage/Forbidden';
+import UpdateUser from '@/modules/users/update-user/UpdateUser';
 import React from 'react';
 
-export default function UpdateAdminPage({
+export default function UpdateUserPage({
   params,
 }: {
   params: { id: string };
@@ -11,7 +10,7 @@ export default function UpdateAdminPage({
   return (
     <>
 
-      <UpdateAdmin id={params.id} />
+      <UpdateUser id={params.id} />
 
     </>
   );

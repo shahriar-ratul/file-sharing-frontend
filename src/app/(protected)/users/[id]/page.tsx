@@ -1,12 +1,11 @@
 'use client';
-import DetailsAdmin from '@/modules/admin/details-admin/DetailsAdmin';
-import Forbidden from '@/modules/errorPage/Forbidden';
+import DetailsUser from '@/modules/users/details-user/DetailsUser';
 import React from 'react';
 
-export default function DetailsAdminPage({
+export default function DetailsUserPage({
     params,
 }: {
     params: { id: string };
 }) {
-    return <DetailsAdmin id={params.id} />;
+    return <DetailsUser id={params.id} />;
 }

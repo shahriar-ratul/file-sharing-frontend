@@ -29,7 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { type AdminModel } from "@/schema/AdminSchema";
+import { type UserModel } from "@/schema/UserSchema";
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -44,6 +44,13 @@ import { useEffect, useState } from "react";
 
 import { AlertModal } from "@/components/custom/modal/alert-modal";
 import { Badge } from "@/components/ui/badge";
+import { DataTable } from "@/components/ui/data-table";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Tooltip,
@@ -53,21 +60,14 @@ import {
 import { cn } from "@/lib/utils";
 import axiosInstance from "@/services/axios/axios";
 import Link from "next/link";
+import React from "react";
 import { toast } from "sonner";
 import { useDebounce } from "use-debounce";
-import React from "react";
-import { DataTable } from "@/components/ui/data-table";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
-export default function AdminTable() {
-  const [tableData, setTableData] = useState<AdminModel[]>([]);
+export default function UserTable() {
+  const [tableData, setTableData] = useState<UserModel[]>([]);
 
-  const [selectedRow, setSelectedRow] = useState<AdminModel | null>(null);
+  const [selectedRow, setSelectedRow] = useState<UserModel | null>(null);
   const [actionType, setActionType] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
@@ -101,7 +101,7 @@ export default function AdminTable() {
     if (actionType === "changeStatus") {
       try {
         const { data } = await axiosInstance.post(
-          `/api/v1/admins/${selectedRow?.id}/status`
+          `/api/v1/users/${selectedRow?.id}/status`
         );
 
         if (data) {
@@ -146,7 +146,7 @@ export default function AdminTable() {
     if (actionType === "delete") {
       try {
         const { data } = await axiosInstance.delete(
-          `/api/v1/admins/${selectedRow?.id}`
+          `/api/v1/users/${selectedRow?.id}`
         );
 
         if (data) {
@@ -191,7 +191,7 @@ export default function AdminTable() {
     setLoading(false);
   };
 
-  const columns: ColumnDef<AdminModel>[] = [
+  const columns: ColumnDef<UserModel>[] = [
     {
       accessorKey: "id",
       header: "Serial No.",
@@ -213,27 +213,7 @@ export default function AdminTable() {
       accessorKey: "email",
       header: "Email",
     },
-    {
-      accessorKey: "role",
-      header: "Role",
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center">
-            <span className="ml-2 flex flex-wrap gap-2">
-              {row.original.roles.map((role, index) => (
-                <Badge
-                  variant="default"
-                  key={`${row.original.id}-role-${role.role.id}-${index}`}
-                  className="text-center flex justify-center items-center"
-                >
-                  {role.role.name}
-                </Badge>
-              ))}
-            </span>
-          </div>
-        );
-      },
-    },
+
     {
       id: "changeStatus",
       header: "Status",
@@ -258,7 +238,7 @@ export default function AdminTable() {
           <Tooltip>
             <TooltipTrigger asChild>
               <Link
-                href={`/admins/${row.original.id}`}
+                href={`/users/${row.original.id}`}
                 className={cn(buttonVariants({ variant: "secondary" }))}
               >
                 <Eye className="h-4 w-4" />
@@ -272,7 +252,7 @@ export default function AdminTable() {
           <Tooltip>
             <TooltipTrigger asChild>
               <Link
-                href={`/admins/${row.original.id}/edit`}
+                href={`/users/${row.original.id}/edit`}
                 className={cn(buttonVariants({ variant: "default" }))}
               >
                 <Edit className="h-4 w-4" />
@@ -324,7 +304,7 @@ export default function AdminTable() {
     }
 
     const { data } = await axiosInstance.get(
-      `/api/v1/admins?page=${adjustedPage}&limit=${limit}&search=${search}&isActive=${isActive}`
+      `/api/v1/users?page=${adjustedPage}&limit=${limit}&search=${search}&isActive=${isActive}`
     );
 
     return data;
@@ -335,7 +315,7 @@ export default function AdminTable() {
     any
   >({
     queryKey: [
-      "admins-list",
+      "users-list",
       pagination.pageIndex,
       pagination.pageSize,
       searchKey,
@@ -351,15 +331,15 @@ export default function AdminTable() {
 
       setTotalPages(data.meta.pageCount as number);
       setTotal(data.meta.total as number);
-      setTableData(data.items as AdminModel[]);
+      setTableData(data.items as UserModel[]);
 
       return true;
     },
   });
 
   const table = useReactTable({
-    data: tableData as AdminModel[],
-    columns: columns as ColumnDef<AdminModel>[],
+    data: tableData as UserModel[],
+    columns: columns as ColumnDef<UserModel>[],
     pageCount: totalPages ?? -1,
     state: {
       pagination,
@@ -421,17 +401,6 @@ export default function AdminTable() {
               </Select>
             </div>
 
-            <div className="w-auto">
-              <Select value={role} onValueChange={(value) => setRole(value)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
 
             <div className="w-auto">
               <Button

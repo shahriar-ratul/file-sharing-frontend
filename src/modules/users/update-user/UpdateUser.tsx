@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import BreadCrumb from '@/components/custom/BreadCrumb';
-import { UpdateAdminForm } from '@/components/forms/admin/update-admin-form';
+import { UpdateUserForm } from '@/components/forms/user/update-user-form';
 import Loader from '@/components/loader/Loader';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
-import { type AdminModel } from '@/schema/AdminSchema';
+import { type UserModel } from '@/schema/UserSchema';
 import axiosInstance from '@/services/axios/axios';
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import React, { useState } from 'react';
 
 
-export default function UpdateAdmin({ id }: any) {
+export default function UpdateUser({ id }: any) {
   const breadcrumbItems = [
     { title: "Admins", link: "/admins" },
     { title: "Update", link: `/admins/${id}/edit` },
@@ -20,18 +20,18 @@ export default function UpdateAdmin({ id }: any) {
 
   const session = useSession();
 
-  const [item, SetItem] = useState<AdminModel | null>(null);
+  const [item, SetItem] = useState<UserModel | null>(null);
   const fetchData = async () => {
-    const { data } = await axiosInstance.get(`/api/v1/admins/${id}`);
+    const { data } = await axiosInstance.get(`/api/v1/users/${id}`);
     return data;
   };
 
   const { isLoading, isError, error, isFetching } = useQuery<boolean, any>({
-    queryKey: ["admins-list", id],
+    queryKey: ["users-list", id],
     queryFn: async () => {
       const { data } = await fetchData();
 
-      SetItem(data.data as AdminModel);
+      SetItem(data.data as UserModel);
 
       return true;
     },
@@ -55,8 +55,10 @@ export default function UpdateAdmin({ id }: any) {
             </div>
           ) : null}
           <Card>
-            <CardHeader>{/* <CardTitle>Admin List</CardTitle> */}</CardHeader>
-            <CardContent>{item && <UpdateAdminForm item={item} />}</CardContent>
+            <CardHeader>
+              <CardTitle>User Update</CardTitle>
+            </CardHeader>
+            <CardContent>{item && <UpdateUserForm item={item} />}</CardContent>
           </Card>
         </div>
       )}
